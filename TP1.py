@@ -25,16 +25,69 @@ def cargar_dividir_imagen(ruta_imagen, n_partes):
 
     return imagenes_partes
 
-# Punto 2: Procesamiento Paralelo
+# Punto 2: Aplicar filtro
 def aplicar_filtro(parte_imagen):
     # Aplicar un filtro de desenfoque
     return gaussian_filter(parte_imagen, sigma=5)
 
-def procesar_parte(parte_imagen, indices_a_procesar, parte_indice):
-    if parte_indice in indices_a_procesar:
-        return aplicar_filtro(parte_imagen)
+# Punto 3: Procesamiento Paralelo con Pipe
+def worker_pipe(parte_imagen, indices_a_procesar, conn, indice):
+    if indice in indices_a_procesar:
+        resultado = aplicar_filtro(parte_imagen)
     else:
-        return parte_imagen
+        resultado = parte_imagen
+    conn.send(resultado)
+    conn.close()
+
+def procesar_con_pipe(imagenes_partes, indices_a_procesar):
+    procesos = []
+    padres_conexiones = []
+
+    for i, parte in enumerate(imagenes_partes):
+        padre_conn, hijo_conn = multiprocessing.Pipe()
+        proceso = multiprocessing.Process(target=worker_pipe, args=(parte, indices_a_procesar, hijo_conn, i))
+        procesos.append(proceso)
+        padres_conexiones.append(padre_conn)
+        proceso.start()
+
+    resultados = [conn.recv() for conn in padres_conexiones]
+
+    for proceso in procesos:
+        proceso.join()
+
+    return resultados
+
+# Punto 4: Manejo de Señales
+def manejador_senal(signal, frame):
+    print('Interrupción recibida, terminando procesos...')
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, manejador_senal)
+
+# Punto 5: Uso de Memoria Compartida
+def worker_memoria_compartida(parte_imagen, shared_array, indice, ancho_parte, indices_a_procesar):
+    if indice in indices_a_procesar:
+        resultado = aplicar_filtro(parte_imagen)
+    else:
+        resultado = parte_imagen
+    shared_array[indice * ancho_parte : (indice + 1) * ancho_parte] = resultado.flatten()
+
+def procesar_con_memoria_compartida(imagenes_partes, indices_a_procesar):
+    ancho_parte = imagenes_partes[0].size
+    shared_array = multiprocessing.Array('d', ancho_parte * len(imagenes_partes))
+
+    procesos = []
+
+    for i, parte in enumerate(imagenes_partes):
+        proceso = multiprocessing.Process(target=worker_memoria_compartida, args=(parte, shared_array, i, ancho_parte,indices_a_procesar),)
+        procesos.append(proceso)
+        proceso.start()
+
+    for proceso in procesos:
+        proceso.join()
+
+    resultados = [np.array(shared_array[i * ancho_parte : (i + 1) * ancho_parte]).reshape(imagenes_partes[0].shape) for i in range(len(imagenes_partes))]
+    return resultados
 
 # Combinación Final de Imágenes
 def combinar_partes(imagenes_partes):
@@ -59,14 +112,13 @@ def main():
     # Cargar y dividir la imagen
     partes_imagen = cargar_dividir_imagen(ruta_imagen, n_partes)
 
-    # Procesar las partes especificadas
-    resultados_procesados = [
-        procesar_parte(parte, indices_a_procesar, i) for i, parte in enumerate(partes_imagen)
-    ]
+    # Elegir un método de procesamiento: Pipe o Memoria Compartida
+    #resultados_procesados = procesar_con_pipe(partes_imagen, indices_a_procesar)
+    resultados_procesados = procesar_con_memoria_compartida(partes_imagen, indices_a_procesar)
 
     # Combinar los resultados en una imagen final
     imagen_final = combinar_partes(resultados_procesados)
-    imagen_final.save('imagen_procesada_parte_3_de_4.jpg')
+    imagen_final.save('imagen_procesada_v5.jpg')
 
 if __name__ == "__main__":
     main()
