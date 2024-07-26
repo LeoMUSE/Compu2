@@ -58,6 +58,7 @@ def procesar_con_pipe(imagenes_partes, indices_a_procesar):
     return resultados
 
 # Punto 4: Manejo de Señales
+
 def manejador_senal(signal, frame):
     print('Interrupción recibida, terminando procesos...')
     sys.exit(0)
@@ -65,6 +66,7 @@ def manejador_senal(signal, frame):
 signal.signal(signal.SIGINT, manejador_senal)
 
 # Punto 5: Uso de Memoria Compartida
+
 def worker_memoria_compartida(parte_imagen, shared_array, indice, ancho_parte, indices_a_procesar):
     if indice in indices_a_procesar:
         resultado = aplicar_filtro(parte_imagen)
@@ -90,6 +92,7 @@ def procesar_con_memoria_compartida(imagenes_partes, indices_a_procesar):
     return resultados
 
 # Combinación Final de Imágenes
+
 def combinar_partes(imagenes_partes):
     altura = imagenes_partes[0].shape[0]
     anchura_total = sum([parte.shape[1] for parte in imagenes_partes])
@@ -104,19 +107,26 @@ def combinar_partes(imagenes_partes):
     return Image.fromarray(imagen_completa)
 
 # Función principal
+
 def main():
+
+    signal.signal(signal.SIGINT, manejador_senal)
+
     ruta_imagen = '/home/leo/Escritorio/Computacion_2/Compu2/Eclipse.jpg'
     n_partes = 4
     indices_a_procesar = [0, 1, 2]  # Índices de las partes a procesar (0, 1, 2, ...)
 
     # Cargar y dividir la imagen
+
     partes_imagen = cargar_dividir_imagen(ruta_imagen, n_partes)
 
     # Elegir un método de procesamiento: Pipe o Memoria Compartida
+
     #resultados_procesados = procesar_con_pipe(partes_imagen, indices_a_procesar)
     resultados_procesados = procesar_con_memoria_compartida(partes_imagen, indices_a_procesar)
 
     # Combinar los resultados en una imagen final
+
     imagen_final = combinar_partes(resultados_procesados)
     imagen_final.save('imagen_procesada_v5.jpg')
 
