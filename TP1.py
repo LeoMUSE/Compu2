@@ -65,11 +65,11 @@ def procesar_con_pipe_memoria(imagenes_partes, indices_a_procesar):
     return imagenes_procesadas
 
 # Punto 4: Manejo de Señales
-def manejador_senal(signal, frame):
+def manejador_señal(signal, frame):
     print('Interrupción recibida, terminando procesos...')
     sys.exit(0)
 
-signal.signal(signal.SIGINT, manejador_senal)
+signal.signal(signal.SIGINT, manejador_señal)
 
 # Combinación Final de Imágenes
 def combinar_partes(imagenes_partes):
@@ -87,7 +87,7 @@ def combinar_partes(imagenes_partes):
 
 # Función principal
 def main():
-    signal.signal(signal.SIGINT, manejador_senal)
+    signal.signal(signal.SIGINT, manejador_señal)
 
     ruta_imagen = '/home/leo/Escritorio/Computacion_2/Compu2/Eclipse.jpg'
     n_partes = 4
