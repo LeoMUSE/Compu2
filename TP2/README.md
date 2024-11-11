@@ -6,9 +6,9 @@ Este proyecto implementa un sistema de procesamiento y escalado de imágenes que
 
 Este proyecto está dividido en tres archivos principales:
 
--async_server.py: El servidor principal que recibe imágenes de clientes, las convierte a escala de grises, y se comunica con el servidor de escalado.
--scale_server.py: Un servidor de escalado que recibe la imagen y la redimensiona al 50% de su tamaño original.
--cliente.py: Un cliente que envía una imagen al servidor principal y recibe un enlace para descargar la imagen escalada.
+- async_server.py: El servidor principal que recibe imágenes de clientes, las convierte a escala de grises, y se comunica con el servidor de escalado.
+- scale_server.py: Un servidor de escalado que recibe la imagen y la redimensiona al 50% de su tamaño original.
+- cliente.py: Un cliente que envía una imagen al servidor principal y recibe un enlace para descargar la imagen escalada.
 
 ## Requisitos
 
@@ -16,8 +16,8 @@ El proyecto requiere Python 3.8 o superior. A continuación se listan las biblio
 
 ## Extensiones y Paquetes Necesarios
 
--aiohttp: Para servir los archivos de imágenes escaladas a través de HTTP en async_server.py.
--Pillow (PIL): Para manipulación de imágenes en Python, utilizado tanto en async_server.py como en scale_server.py.
+- aiohttp: Para servir los archivos de imágenes escaladas a través de HTTP en async_server.py.
+- Pillow (PIL): Para manipulación de imágenes en Python, utilizado tanto en async_server.py como en scale_server.py.
 
 ### Instala los paquetes con:
 
@@ -61,7 +61,7 @@ El cliente enviará la imagen y recibirá un enlace a la imagen escalada, que pu
 
 ## Ejemplo de Ejecución
 
--Servidor de Escalado:
+- Servidor de Escalado:
 
 python3 scale_server.py
 
@@ -73,7 +73,7 @@ Imagen recibida con dimensiones originales: 350x418
 Imagen escalada a 175x209.
 Escalado completado, imagen escalada enviada al cliente.
 
--Servidor Principal Asíncrono:
+- Servidor Principal Asíncrono:
 
 python3 async_server.py --ip 127.0.0.1 --port 8080
 
@@ -84,7 +84,7 @@ Cliente conectado.
 Recibido 936034 bytes de la imagen del cliente.
 Enlace de imagen escalada enviado al cliente: http://127.0.0.1:8082/scaled_image_1697058295.jpg
 
--Cliente:
+- Cliente:
 
 python3 cliente.py --ip 127.0.0.1 --port 8080 --image Imagen.jpg
 
